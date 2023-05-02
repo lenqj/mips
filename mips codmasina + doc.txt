@@ -1,0 +1,57 @@
+0  add  $1, $0, $0  # i = 0, contorul buclei 
+1  addi $2, $0, 5   # se salvează numărul maxim de iterații (5)  
+2  add  $3, $0, $0  # inițializarea indexului locației de memorie 
+3  add  $4, $0, $0  # sum = 0 
+4  beq  $2, $1, 6   # s-au făcut 5 iterații? dacă da, salt în afara buclei 
+5  lw   $5, 1($3)   # în $5 se aduce elementul curent din șir 
+6  add  $4, $4, $5  # se adună la suma parțială din $4 elementul curent 
+7  sw   $5, 0($3)   # salvam suma partiala
+8 addi $3, $3, 1    # indexul următorului element din șir 
+9 addi $1, $1, 1    # i = i + 1, actualizarea contorului buclei 
+10 j    4 			# salt începutul buclei 
+11 sllv $4, $4, 2   # shiftare cu 2 pozitii / inmultire cu 32
+12 sw   $4, 0($3)   # salvarea sumei în memorie la adresa 80 
+	
+
+B"000_000_000_001_0_000",  --  0  add  $1, $0, $0  X"0010" 
+B"001_010_000_0000101",    --  1  addi $2, $0, 5   X"2805" 
+B"000_000_000_011_0_000",  --  2  add  $3, $0, $0  X"0030" 
+B"000_000_000_100_0_000",  --  3  add  $4, $0, $0  X"0040" 
+B"100_001_010_0000110",    --  4  beq  $2, $1, 6   X"8506" 
+B"010_011_101_0000000",    --  5  lw   $5, 0($3)   X"4E80" 
+B"000_100_100_101_0_000",  --  6  add  $4, $4, $5  X"1250"
+B"011_011_101_0000000",    --  7  sw   $5, 0($3)   X"6E80" 
+B"001_011_011_0000001",    --  8  addi $3, $3, 1   X"2D81" 
+B"001_001_001_0000001",    --  9  addi $1, $1, 1   X"2481"
+B"111_0000000000100",      --  10 j    4     	   X"E005"
+B"000_100_010_100_0_111",  --  11 sllv $4, $4, 2   X"1147"
+B"011_011_100_0000000",    --  12 sw   $4, 0($3)   X"6E00"
+
+
+Probleme: Bucla infinita, care ma gandesc ca e din cauza beq-ului. Am verificat codul insa nu pot sa imi dau seama de unde apare problema asta. 
+Alte probleme de implementare nu am avut.
+
+
+Operatii alese: 
+SLL - shiftare logica la stanga cu un numar variabil de biti
+sll $d, $s, $t
+$d <- $t<<1
+000_XXX_XXX_XXX_1_100
+
+SRL - shiftare logica la dreapta cu un numar variabil de biti
+srl $d, $s, $t
+$d <- $t>>1
+000_XXX_XXX_XXX_1_101
+
+XOR - XOR logic pe biti realizat intre 2 registrii si rezultatul fiind stocat in cel de-al treilea
+xor $d, $s, $t
+$d -> $s ^ $t
+000_XXX_XXX_XXX_1_110
+
+SLLV - shiftare logica la stanga variabila, similara cu sll, doar ca foloseste valoarea registrului ca numar de shiftari
+sllv $d, $s, $t
+$d <- $t<<1
+000_XXX_XXX_XXX_1_111
+
+
+Motiv: Pentru eficentizarea si manipularea mai usoara a datelor. In cazul nostru inmultirea cu 2^5, mai exact 32
